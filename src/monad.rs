@@ -9,38 +9,38 @@ pub trait Monad : Applicative {
     ;
 }
 
-impl<A> Monad for Concrete<Box<forall_t>,A> {
+impl<A> Monad for Box<A> {
     fn bind<F,B>(f:&mut F, s:Self) -> <Self as Plug<B>>::result_t
     where 
         Self:Plug<F>+Plug<B>,
         F:Fn(<Self as Unplug>::A) -> <Self as Plug<B>>::result_t
     {
-        f(*s.unwrap)
+        f(*s)
     }
 }
 
-impl<A:Clone> Monad for Concrete<Vec<forall_t>,A> {
+impl<A:Clone> Monad for Vec<A> {
     fn bind<F,B>(f:&mut F, s:Self) -> <Self as Plug<B>>::result_t
     where
         F:Fn(<Self as Unplug>::A) -> <Self as Plug<B>>::result_t + Clone
     {
         let res:Vec<B> = 
-            s.unwrap
+            s
             .into_iter()
-            .map(|x|f.clone()(x).unwrap)
+            .map(|x|f.clone()(x))
             .flatten().collect();
-        Concrete::of(res)
+        res
     }
 }
 
-impl<A> Monad for Concrete<Option<forall_t>,A> {
+impl<A> Monad for Option<A> {
     fn bind<F,B>(f:&mut F, s:Self) -> <Self as Plug<B>>::result_t
     where
         F:Fn(<Self as Unplug>::A) -> <Self as Plug<B>>::result_t
     {
-        match s.unwrap {
+        match s {
             Some(x) => f(x),
-            None => Concrete::of(None as Option<B>)
+            None => None
         }
     }
 }

@@ -7,27 +7,28 @@ pub trait Functor: Unplug+Plug<<Self as Unplug>::A> {
         ;
 }
 
-impl<A> Functor for Concrete<Box<forall_t>,A> {
+impl<A> Functor for Box<A> {
     fn map<B,F>(f:F, s:Self) -> <Self as Plug<B>>::result_t where
         F:Fn(<Self as Unplug>::A) -> B
     { 
-        Concrete::of(Box::new(f(*(s.unwrap))))
+        Box::new(f(*s))
     }
 }
 
-impl<A> Functor for Concrete<Vec<forall_t>,A> {
+impl<A> Functor for Vec<A> {
     fn map<B,F>(f:F, s:Self) -> <Self as Plug<B>>::result_t where
         F:Fn(<Self as Unplug>::A) -> B
     { 
-        Concrete::of(s.unwrap.into_iter().map(f).collect())
+        s.into_iter().map(f).collect()
     }
 }
 
-impl<A> Functor for Concrete<Option<forall_t>,A> {
+
+impl<A> Functor for Option<A> {
     fn map<B,F>(f:F, s:Self) -> <Self as Plug<B>>::result_t where
         F:Fn(<Self as Unplug>::A) -> B
     {
-        Concrete::of(s.unwrap.map(f))
+        s.map(f)
     }
 }
 

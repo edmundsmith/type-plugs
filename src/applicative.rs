@@ -12,24 +12,22 @@ pub trait Applicative: Functor {
         ;
 }
 
-impl<A> Applicative for Concrete<Box<forall_t>,A> {
+impl<A> Applicative for Box<A> {
     fn pure(a:A) -> Self {
-        Concrete::of(Box::new(a))
+        Box::new(a)
     }
 
     fn app<B, F>(f:<Self as Plug<F>>::result_t, s:Self) -> <Self as Plug<B>>::result_t
     where
         F:Fn(<Self as Unplug>::A) -> B
     {
-        Concrete::of(
-            Box::new((*f.unwrap)(*s.unwrap))
-        )
+        Box::new((*f)(*s))
     }
 }
 
-impl<A:Clone> Applicative for Concrete<Vec<forall_t>,A> {
+impl<A:Clone> Applicative for Vec<A> {
     fn pure(a:A) -> Self {
-        Concrete::of(vec![a])
+        vec![a]
     }
     fn app<B, F>(fs:<Self as Plug<F>>::result_t, s:Self) -> <Self as Plug<B>>::result_t
     where
@@ -41,27 +39,25 @@ impl<A:Clone> Applicative for Concrete<Vec<forall_t>,A> {
             Functor::map(|f:F|
                 f.clone()(x.clone()),
             fs.clone()),
-        s).unwrap.into_iter().map(|x|x.unwrap).flatten().collect();
-        Concrete::of(flat)
+        s).into_iter().flatten().collect();
+        flat
     }
 }
 
-impl<A> Applicative for Concrete<Option<forall_t>,A> {
+impl<A> Applicative for Option<A> {
     fn pure(a:A) -> Self {
-        Concrete::of(Some(a))
+        Some(a)
     }
     fn app<B, F>(fs:<Self as Plug<F>>::result_t, s:Self) -> <Self as Plug<B>>::result_t
     where
         F:Fn(<Self as Unplug>::A) -> B
     {
-        Concrete::of(
-            match fs.unwrap {
-                Some(f) => match s.unwrap {
-                    Some(x) => Some(f(x)),
-                    None => None
-                },
+        match fs {
+            Some(f) => match s {
+                Some(x) => Some(f(x)),
                 None => None
-            }
-        )
+            },
+            None => None
+        }
     }
 }
