@@ -1,0 +1,9 @@
+[package]
+name = "type-plugs"
+version = "0.1.0"
+authors = ["Edmund Smith <edmund.pd.smith@gmail.com>"]
+readme = "readme.md"
+license = "MIT"
+keywords = ["monad", "hkt", "gat", "typelevel", "plug"]
+
+[dependencies]
