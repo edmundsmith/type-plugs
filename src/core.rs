@@ -36,3 +36,15 @@ impl<M:Plug<A>+Unplug,A> Unplug for Concrete<M,A> {
     type F = M;
     type A = A;
 }
+
+macro_rules! plug {
+    ($t1:ty [ $t2:ty ]) => {
+        <$t1 as Plug<$t2>>::result_t
+    };
+}
+
+macro_rules! unplug {
+    ($t:ty, $v:ident) => {
+        <$t as Unplug>::$v
+    };
+}

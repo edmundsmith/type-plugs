@@ -1,23 +1,23 @@
 use core::*;
 
-pub trait Functor: Unplug+Plug<<Self as Unplug>::A> {
-    fn map<B, F>(f:F, s:Self) -> <Self as Plug<B>>::result_t where
+pub trait Functor: Unplug+Plug<unplug!(Self, A)> {
+    fn map<B, F>(f:F, s:Self) -> plug!(Self[B]) where
         Self:Plug<B>,
         F:Fn(<Self as Unplug>::A) -> B
         ;
 }
 
 impl<A> Functor for Box<A> {
-    fn map<B,F>(f:F, s:Self) -> <Self as Plug<B>>::result_t where
-        F:Fn(<Self as Unplug>::A) -> B
+    fn map<B,F>(f:F, s:Self) -> plug!(Self[B]) where
+        F:Fn(unplug!(Self, A)) -> B
     { 
         Box::new(f(*s))
     }
 }
 
 impl<A> Functor for Vec<A> {
-    fn map<B,F>(f:F, s:Self) -> <Self as Plug<B>>::result_t where
-        F:Fn(<Self as Unplug>::A) -> B
+    fn map<B,F>(f:F, s:Self) -> plug!(Self[B]) where
+        F:Fn(unplug!(Self, A)) -> B
     { 
         s.into_iter().map(f).collect()
     }
@@ -25,8 +25,8 @@ impl<A> Functor for Vec<A> {
 
 
 impl<A> Functor for Option<A> {
-    fn map<B,F>(f:F, s:Self) -> <Self as Plug<B>>::result_t where
-        F:Fn(<Self as Unplug>::A) -> B
+    fn map<B,F>(f:F, s:Self) -> plug!(Self[B]) where
+        F:Fn(unplug!(Self, A)) -> B
     {
         s.map(f)
     }
