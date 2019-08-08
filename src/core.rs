@@ -1,14 +1,25 @@
 #[allow(non_camel_case_types, bare_trait_objects)]
 pub struct forall_t;
 
+macro_rules! plug {
+    ($t1:ty [ $t2:ty ]) => {
+        <$t1 as Plug<$t2>>::result_t
+    };
+}
+
+macro_rules! unplug {
+    ($t:ty, $v:ident) => {
+        <$t as Unplug>::$v
+    };
+}
+
 pub struct Concrete<M: Unplug + Plug<A>, A> {
-    pub unwrap: <M as Plug<A>>::result_t,
+    pub unwrap: plug!(M[A]),
 }
 
 impl<M: Unplug + Plug<A>, A> Clone for Concrete<M, A>
 where
-    <M as Plug<A>>::result_t: Clone,
-    <M as Plug<A>>::result_t: Unplug<F = M, A = A>,
+    plug!(M[A]): Clone + Unplug<F = M, A = A>,
 {
     fn clone(&self) -> Self {
         Concrete::of(self.unwrap.clone())
@@ -40,16 +51,4 @@ impl<M: Plug<A> + Plug<B> + Unplug, A, B> Plug<B> for Concrete<M, A> {
 impl<M: Plug<A> + Unplug, A> Unplug for Concrete<M, A> {
     type F = M;
     type A = A;
-}
-
-macro_rules! plug {
-    ($t1:ty [ $t2:ty ]) => {
-        <$t1 as Plug<$t2>>::result_t
-    };
-}
-
-macro_rules! unplug {
-    ($t:ty, $v:ident) => {
-        <$t as Unplug>::$v
-    };
 }

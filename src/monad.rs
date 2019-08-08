@@ -44,20 +44,17 @@ impl<A> Monad for Option<A> {
 mod tests {
     use super::*;
     ///wew lad
-    fn higher_poly_demo<'a, M: Monad, A: 'a + Clone, B: 'a + Clone, F>(
-        m: M,
-        f: F,
-    ) -> <M as Plug<B>>::result_t
+    fn higher_poly_demo<'a, M: Monad, A: 'a + Clone, B: 'a + Clone, F>(m: M, f: F) -> plug!(M[B])
     where
-        M: Plug<A> + Plug<B> + Unplug<A = A>, //+Plug<F>+Plug<Fn(A)-><M as Plug<B>>::result_t>,
-        M: Plug<Box<Fn(A) -> <M as Plug<B>>::result_t>>,
+        M: Plug<A> + Plug<B> + Unplug<A = A>, //+Plug<F>+Plug<Fn(A)->plug!(M[B])>,
+        M: Plug<Box<Fn(A) -> plug!(M[B])>>,
         M: Plug<F>,
         F: 'static,
-        <M as Unplug>::F: Plug<A> + Plug<B>,
-        <M as Plug<B>>::result_t: Monad + Unplug<A = B> + 'a,
-        <<M as Plug<B>>::result_t as Unplug>::F: Plug<B>,
+        unplug!(M, F): Plug<A> + Plug<B>,
+        plug!(M[B]): Monad + Unplug<A = B> + 'a,
+        unplug!(plug!(M[B]), F): Plug<B>,
         F: Fn(A) -> B + 'a,
-        //F:Fn(A) -> <M as Plug<B>>::result_t + Clone,
+        //F:Fn(A) -> plug!(M[B]) + Clone,
     {
         let cl = Box::new(move |x| Applicative::pure(f(x)));
         Monad::bind::<Box<Fn(A) -> _>, B>(cl as Box<Fn(A) -> _>, m)
