@@ -1,8 +1,8 @@
-use core::{Plug, Unplug, forall_t};
+use core::{forall_t, Plug, Unplug};
 
 macro_rules! simple_impl {
     ($name:ident) => {
-        impl<A,B> Plug<B> for $name<A>{
+        impl<A, B> Plug<B> for $name<A> {
             type result_t = $name<B>;
         }
 
