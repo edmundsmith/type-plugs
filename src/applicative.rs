@@ -1,15 +1,13 @@
 use core::*;
 use functor::*;
-use std::ops::Deref;
-use core::*;
 
 pub trait Applicative: Functor {
-    fn pure(s:unplug!(Self, A)) -> Self;
+    fn pure(s:Self::A) -> Self;
     fn app<B, F>(f:plug!(Self[F]), s:Self) -> plug!(Self[B]) where
-        F:Fn(unplug!(Self, A)) -> B,
+        F:Fn(Self::A) -> B,
         Self:Plug<F>+Plug<B>+Unplug,
-        plug!(Self[F]):Unplug<F=unplug!(Self, F),A=F>+Plug<F>+Clone,
-        unplug!(Self, F):Plug<F>
+        plug!(Self[F]):Unplug<F=Self::F,A=F>+Plug<F>+Clone,
+        Self::F:Plug<F>
         ;
 }
 
@@ -20,7 +18,7 @@ impl<A> Applicative for Box<A> {
 
     fn app<B, F>(f:plug!(Self[F]), s:Self) -> plug!(Self[B])
     where
-        F:Fn(unplug!(Self, A)) -> B
+        F:Fn(Self::A) -> B
     {
         Box::new((*f)(*s))
     }
@@ -32,7 +30,7 @@ impl<A:Clone> Applicative for Vec<A> {
     }
     fn app<B, F>(fs:plug!(Self[F]), s:Self) -> plug!(Self[B])
     where
-        F:Fn(unplug!(Self, A)) -> B,
+        F:Fn(Self::A) -> B,
         plug!(Self[F]): Clone,
     {
         let flat:Vec<B> = 
@@ -51,7 +49,7 @@ impl<A> Applicative for Option<A> {
     }
     fn app<B, F>(fs:plug!(Self[F]), s:Self) -> plug!(Self[B])
     where
-        F:Fn(unplug!(Self, A)) -> B
+        F:Fn(Self::A) -> B
     {
         match fs {
             Some(f) => match s {

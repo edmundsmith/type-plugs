@@ -5,7 +5,7 @@ pub trait Monad : Applicative {
     fn bind<F,B>(f:F, s:Self) -> plug!(Self[B])
     where 
         Self:Plug<F>+Plug<B>,
-        F:Fn(unplug!(Self, A)) -> plug!(Self[B])
+        F:Fn(Self::A) -> plug!(Self[B])
     ;
 }
 
@@ -13,7 +13,7 @@ impl<A> Monad for Box<A> {
     fn bind<F,B>(f:F, s:Self) -> plug!(Self[B])
     where 
         Self:Plug<F>+Plug<B>,
-        F:Fn(unplug!(Self, A)) -> plug!(Self[B])
+        F:Fn(Self::A) -> plug!(Self[B])
     {
         f(*s)
     }
@@ -22,13 +22,12 @@ impl<A> Monad for Box<A> {
 impl<A:Clone> Monad for Vec<A> {
     fn bind<F,B>(f:F, s:Self) -> plug!(Self[B])
     where
-        F:Fn(unplug!(Self, A)) -> plug!(Self[B])
+        F:Fn(Self::A) -> plug!(Self[B])
     {
         let res:Vec<B> = 
             s
             .into_iter()
-            .map(|x|f(x))
-            .flatten().collect();
+            .flat_map(f).collect();
         res
     }
 }
@@ -36,7 +35,7 @@ impl<A:Clone> Monad for Vec<A> {
 impl<A> Monad for Option<A> {
     fn bind<F,B>(f:F, s:Self) -> plug!(Self[B])
     where
-        F:Fn(unplug!(Self, A)) -> plug!(Self[B])
+        F:Fn(Self::A) -> plug!(Self[B])
     {
         match s {
             Some(x) => f(x),
